@@ -1,0 +1,45 @@
+version: '3.3'
+
+services:
+  wordpress:
+    build: .
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass
+      WORDPRESS_DB_NAME: wpdb
+    volumes:
+      - ./plugins:/var/www/html/wp-content/plugins/meu-plugin
+      - ./src:/var/www/html
+    networks:
+      - wordpress
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: wpdb
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - /mnt/wordpress/mysql/:/var/lib/mysql
+    networks:
+      - wordpress
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8888:8080
+    depends_on:
+      - db
+    networks:
+      - wordpress
+
+networks:
+  wordpress:
+    driver: bridge
